@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.smbms.dao.user.UserDao">
+    <select id="getUserCount" resultType="int" >
+        select count(*) from smbms_user;
+    </select>
+
+    <select id="getUserList" resultType="cn.smbms.beans.User" >
+        select * from smbms_user;
+    </select>
+
+
+    <select id="getUserListByName" resultType="User"  parameterType="String">
+        select *from smbms_user where userName like CONCAT("%" , #{name} , "%")
+    </select>
+
+    <insert id="addUser"  parameterType="User">
+     insert into smbms_user (userCode,userName,userPassword) value (#{userCode}, #{userName}, #{userPassword});
+        </insert>
+
+    <update id="updateUser" parameterType="User">
+      update  smbms_user
+      <trim prefix="set"  suffixOverrides="," suffix="where id=#{id}">
+      <if test="userCode!=null">userCode=#{userCode},</if>
+      <if test="userName!=null">userName=#{userName}</if>
+      </trim>
+    </update>
+
+
+    <update id="updatePwdById" >
+        update  smbms_user  set  userPassword=#{pwd} where  id=#{id}
+    </update>
+
+    <delete id="deleteUser">
+        delete from  smbms_user where id=#{id}
+    </delete>
+
+
+
+    <select id="getUserListByRole"  resultMap="userList" >
+        select u.id ,u.userCode,u.userName ,u.userRole ,r.roleCode , r.roleName
+        from smbms_user u ,smbms_role  r
+        where u.userRole=#{id}
+           and  u.userRole=r.id
+    </select>
+
+    <resultMap id="userList" type="User">
+        <result property="id" column="id"></result>
+        <result property="userCode" column="userCode"></result>
+        <result property="userName" column="userName"></result>
+        <result property="userRole" column="userRole"></result>
+        <association property="role" resultMap="roleList" javaType="Role"></association>
+    </resultMap>
+
+
+    <resultMap id="roleList" type="Role">
+        <result property="roleCode" column="roleCode"></result>
+        <result property="roleName"  column="roleName"></result>
+    </resultMap>
+
+
+    <select id="getUserListByid" resultMap="adduser">
+        select u.id,u.userName,a.contact,a.addressDesc
+
+        from smbms_user u ,smbms_address a where
+        u.id=#{id} and u.id=a.userId
+    </select>
+
+    <resultMap id="adduser" type="User" >
+        <id property="id" column="id"></id>
+        <result property="userName" column="userName"></result>
+      <collection property="couaddress" ofType="Address" resultMap="jaddress"></collection>
+    </resultMap>
+
+    <resultMap id="jaddress" type="Address">
+        <result property="contact" column="contact"></result>
+        <result property="addressDesc" column="addressDesc"></result>
+    </resultMap>
+
+
+
+</mapper>
